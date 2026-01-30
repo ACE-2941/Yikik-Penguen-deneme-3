@@ -8,13 +8,12 @@ let puan = 0;
 let gameActive = true;
 let gameOverTimer = 0;
 
-// ASSETLER
+// ASSETLER - Uzantıyı .jpg yaptık
 const penguinImg = new Image();
 penguinImg.src = "assets/penguin.png";
 
 const bgImg = new Image();
-// BURAYI KONTROL ET: GitHub'da tam olarak ne yazıyorsa o olmalı
-bgImg.src = "assets/arka-plan.jpeg"; 
+bgImg.src = "assets/arka-plan.jpg"; // UZANTI JPG OLARAK GÜNCELLENDİ
 
 const penguin = {
     x: 148,
@@ -79,6 +78,7 @@ function update() {
         timer = 0;
     }
 
+    // HIZLANMA DİNAMİĞİ
     let oyunHizi = (puan < 100) ? 4 : 4 + (puan - 100) * 0.05;
 
     obstacles.forEach((o, i) => {
@@ -102,28 +102,18 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Arka Plan Çizimi (Hata Kontrollü)
-    try {
-        if (bgImg.complete && bgImg.naturalWidth > 0) {
-            ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-        } else {
-            ctx.fillStyle = "#87ceeb";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-    } catch (e) {
+    // Arka Plan Çizimi
+    if (bgImg.complete && bgImg.naturalWidth > 0) {
+        ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+    } else {
         ctx.fillStyle = "#87ceeb";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Penguen Çizimi (Hata Kontrollü)
-    try {
-        if (penguinImg.complete && penguinImg.naturalWidth > 0) {
-            ctx.drawImage(penguinImg, penguin.frameX * 64, penguin.frameY * 40, 64, 40, penguin.x, penguin.y, 64, 64);
-        } else {
-            ctx.fillStyle = "black";
-            ctx.fillRect(penguin.x, penguin.y, 40, 40);
-        }
-    } catch (e) {
+    // Penguen Çizimi
+    if (penguinImg.complete && penguinImg.naturalWidth > 0) {
+        ctx.drawImage(penguinImg, penguin.frameX * 64, penguin.frameY * 40, 64, 40, penguin.x, penguin.y, 64, 64);
+    } else {
         ctx.fillStyle = "black";
         ctx.fillRect(penguin.x, penguin.y, 40, 40);
     }
@@ -134,7 +124,7 @@ function draw() {
         ctx.fillRect(o.x, o.y, o.s, o.s);
     });
 
-    // Puan
+    // Puan (Sol Üst)
     ctx.fillStyle = "white";
     ctx.font = "bold 26px Arial";
     ctx.shadowColor = "black";
@@ -163,5 +153,4 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// Oyunu hemen başlat, resimleri bekleme
 gameLoop();
