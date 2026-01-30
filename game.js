@@ -8,20 +8,17 @@ let puan = 0;
 let gameActive = true;
 let gameOverTimer = 0;
 
-// ASSETLER - Uzantıları ve yolları tekrar kontrol et
+// ASSETLER
 const penguinImg = new Image();
 penguinImg.src = "assets/penguin.png";
 
 const bgImg = new Image();
 bgImg.src = "assets/arka-plan.jpg"; 
 
-const buzImg = new Image();
-buzImg.src = "assets/buz.png?v=2";;
-
 const penguin = {
     x: 130, 
-    y: 500, // Daha büyük olduğu için biraz daha yukarıda durmalı
-    w: 200, // Pengueni 100px yaptık (İyice büyüdü)
+    y: 500,
+    w: 100, 
     h: 100,
     frameX: 0,
     frameY: 0,
@@ -42,7 +39,6 @@ window.onkeydown = (e) => {
     if (e.key === "ArrowLeft") moveDir = -1;
     if (e.key === "ArrowRight") moveDir = 1;
     if (e.key === " " || e.key === "ArrowUp") jump();
-    // Oyun bittiyse herhangi bir tuşa basınca SIFIRLA
     if (!gameActive && gameOverTimer > 30) resetGame();
 };
 window.onkeyup = () => moveDir = 0;
@@ -56,7 +52,6 @@ function jump() {
     }
 }
 
-// YENİLENME SORUNUNU ÇÖZEN SIFIRLAMA
 function resetGame() {
     puan = 0;
     obstacles = [];
@@ -66,20 +61,43 @@ function resetGame() {
     penguin.y = 500;
     penguin.velocityY = 0;
     timer = 0;
-    console.log("Oyun sıfırlandı!");
+}
+
+// BUZ ÇİZME FONKSİYONU (Resim Yerine Geçer)
+function drawIce(x, y, w, h) {
+    ctx.save();
+    ctx.beginPath();
+    // Sivri uç aşağı bakacak şekilde üçgen çizimi
+    ctx.moveTo(x, y);                 // Sol üst
+    ctx.lineTo(x + w, y);             // Sağ üst
+    ctx.lineTo(x + w / 2, y + h);     // Alt orta (Sivri uç)
+    ctx.closePath();
+
+    // Buz Efekti (Gradyan Mavi)
+    let grad = ctx.createLinearGradient(x, y, x, y + h);
+    grad.addColorStop(0, "#e0f7fa"); // Açık buz rengi
+    grad.addColorStop(1, "#4fc3f7"); // Koyu buz rengi
+    
+    ctx.fillStyle = grad;
+    ctx.fill();
+    
+    // Parlama çizgisi (Beyaz ince kenar)
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
 }
 
 function update() {
     if (!gameActive) {
         gameOverTimer++;
-        return; // Sayfa donmasın diye reload yerine bekliyoruz
+        return;
     }
 
-    penguin.x += moveDir * 9; // Hızı biraz artırdım
+    penguin.x += moveDir * 9;
     penguin.y += penguin.velocityY;
     penguin.velocityY += penguin.gravity;
 
-    // Zemin Kontrolü
     if (penguin.y > 500) {
         penguin.y = 500;
         penguin.isJumping = false;
@@ -95,7 +113,8 @@ function update() {
     let uretimSikligi = (puan < 100) ? 80 : 55;
 
     if (++timer > uretimSikligi) {
-        obstacles.push({ x: Math.random() * (canvas.width - 50), y: -60, s: 60 });
+        // Buz boyutlarını ayarladık
+        obstacles.push({ x: Math.random() * (canvas.width - 40), y: -60, w: 40, h: 70 });
         timer = 0;
     }
 
@@ -105,9 +124,9 @@ function update() {
             obstacles.splice(i, 1);
             puan++;
         }
-        // Hitbox (Çarpışma alanı - Penguen büyük olduğu için ayarlandı)
-        if (penguin.x + 25 < o.x + o.s && penguin.x + 75 > o.x && 
-            penguin.y + 20 < o.y + o.s && penguin.y + 85 > o.y) {
+        // Çarpışma Kontrolü
+        if (penguin.x + 30 < o.x + o.w && penguin.x + 70 > o.x && 
+            penguin.y + 20 < o.y + o.h && penguin.y + 80 > o.y) {
             gameActive = false;
         }
     });
@@ -121,7 +140,6 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Arka Plan
     if (bgImg.complete && bgImg.naturalWidth > 0) {
         ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
     } else {
@@ -129,7 +147,6 @@ function draw() {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Penguen (100x100 çiziyoruz)
     if (penguinImg.complete && penguinImg.naturalWidth > 0) {
         ctx.drawImage(penguinImg, penguin.frameX * 64, penguin.frameY * 40, 64, 40, penguin.x, penguin.y, penguin.w, penguin.h);
     } else {
@@ -137,22 +154,11 @@ function draw() {
         ctx.fillRect(penguin.x, penguin.y, penguin.w, penguin.h);
     }
 
-    // Buzlar
+    // BUZLAR BURADA ÇİZİLİYOR
     obstacles.forEach(o => {
-    if (buzImg.complete && buzImg.naturalWidth > 0) {
-        // Gelişmiş Çizim: Beyaz arka planı filtrele (isteğe bağlı hile)
-        // Eğer görselin tam beyazsa (#FFFFFF), bu satır onu saydamlaştırır
-        ctx.save();
-        ctx.drawImage(buzImg, o.x, o.y, o.s, o.s);
-        ctx.restore();
-    } else {
-        ctx.fillStyle = "white"; 
-        ctx.fillRect(o.x, o.y, o.s, o.s);
-    }
-});
+        drawIce(o.x, o.y, o.w, o.h);
     });
 
-    // Puan
     ctx.fillStyle = "white";
     ctx.font = "bold 26px Arial";
     ctx.shadowColor = "black";
@@ -160,7 +166,6 @@ function draw() {
     ctx.fillText("PUAN: " + puan, 20, 45);
     ctx.shadowBlur = 0;
 
-    // Bitiş Ekranı
     if (!gameActive) {
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -171,7 +176,7 @@ function draw() {
         ctx.fillStyle = "white";
         ctx.font = "20px Arial";
         ctx.fillText("Puan: " + puan, canvas.width / 2, canvas.height / 2 + 50);
-        ctx.fillText("EKRANA BASIVER", canvas.width / 2, canvas.height / 2 + 90);
+        ctx.fillText("TEKRAR İÇİN TIKLA", canvas.width / 2, canvas.height / 2 + 90);
         ctx.textAlign = "left";
     }
 }
@@ -182,8 +187,5 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// Tıklama ile restart desteği (Mobil ve donma karşıtı)
-canvas.addEventListener("touchstart", () => { if(!gameActive) resetGame(); });
 canvas.addEventListener("mousedown", () => { if(!gameActive) resetGame(); });
-
 gameLoop();
