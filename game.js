@@ -8,12 +8,13 @@ let puan = 0;
 let gameActive = true;
 let gameOverTimer = 0;
 
-// ASSETLER - Uzantıyı .jpg yaptık
+// ASSETLER
 const penguinImg = new Image();
 penguinImg.src = "assets/penguin.png";
 
 const bgImg = new Image();
-bgImg.src = "assets/arka-plan.jpg"; // UZANTI JPG OLARAK GÜNCELLENDİ
+// EĞER DOSYA ADIN FARKLIYSA BURAYI DÜZELT:
+bgImg.src = "assets/arka-plan.jpg"; 
 
 const penguin = {
     x: 148,
@@ -33,7 +34,6 @@ let obstacles = [];
 let timer = 0;
 let moveDir = 0;
 
-// KONTROLLER
 window.onkeydown = (e) => {
     if (e.key === "ArrowLeft") moveDir = -1;
     if (e.key === "ArrowRight") moveDir = 1;
@@ -78,7 +78,6 @@ function update() {
         timer = 0;
     }
 
-    // HIZLANMA DİNAMİĞİ
     let oyunHizi = (puan < 100) ? 4 : 4 + (puan - 100) * 0.05;
 
     obstacles.forEach((o, i) => {
@@ -102,7 +101,8 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Arka Plan Çizimi
+    // ARKA PLAN ÇİZİMİ (HATA KORUMALI)
+    // naturalWidth > 0 kontrolü resmin "broken" olmadığını kanıtlar
     if (bgImg.complete && bgImg.naturalWidth > 0) {
         ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
     } else {
@@ -110,7 +110,7 @@ function draw() {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Penguen Çizimi
+    // PENGUEN ÇİZİMİ (HATA KORUMALI)
     if (penguinImg.complete && penguinImg.naturalWidth > 0) {
         ctx.drawImage(penguinImg, penguin.frameX * 64, penguin.frameY * 40, 64, 40, penguin.x, penguin.y, 64, 64);
     } else {
@@ -118,13 +118,12 @@ function draw() {
         ctx.fillRect(penguin.x, penguin.y, 40, 40);
     }
 
-    // Engeller
     ctx.fillStyle = "#800000";
     obstacles.forEach(o => {
         ctx.fillRect(o.x, o.y, o.s, o.s);
     });
 
-    // Puan (Sol Üst)
+    // PUAN TABLOSU
     ctx.fillStyle = "white";
     ctx.font = "bold 26px Arial";
     ctx.shadowColor = "black";
@@ -132,7 +131,7 @@ function draw() {
     ctx.fillText("PUAN: " + puan, 20, 45);
     ctx.shadowBlur = 0;
 
-    // Oyun Bitti Ekranı
+    // PENGUEN FİNİTO EKRANI
     if (!gameActive) {
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
