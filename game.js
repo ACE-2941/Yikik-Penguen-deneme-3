@@ -1,4 +1,3 @@
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -9,28 +8,13 @@ let puan = 0;
 let gameActive = true;
 let gameOverTimer = 0;
 
-// RESİM YÜKLEME KONTROLÜ
-let yuklenenResimSayisi = 0;
-const toplamResim = 2;
-
-function resimYuklendi() {
-    yuklenenResimSayisi++;
-    if (yuklenenResimSayisi >= toplamResim) {
-        console.log("Tüm resimler hazır, oyun başlıyor...");
-        gameLoop();
-    }
-}
-
 // ASSETLER
 const penguinImg = new Image();
 penguinImg.src = "assets/penguin.png";
-penguinImg.onload = resimYuklendi;
-penguinImg.onerror = () => { console.error("Penguen bulunamadı!"); resimYuklendi(); };
 
 const bgImg = new Image();
-bgImg.src = "assets/arka-plan.jpeg"; // JPEG uzantısına dikkat!
-bgImg.onload = resimYuklendi;
-bgImg.onerror = () => { console.error("Arka plan bulunamadı!"); resimYuklendi(); };
+// BURAYI KONTROL ET: GitHub'da tam olarak ne yazıyorsa o olmalı
+bgImg.src = "assets/arka-plan.jpeg"; 
 
 const penguin = {
     x: 148,
@@ -118,18 +102,28 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Arka Plan Çizimi
-    if (bgImg.complete && bgImg.naturalWidth > 0) {
-        ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-    } else {
+    // Arka Plan Çizimi (Hata Kontrollü)
+    try {
+        if (bgImg.complete && bgImg.naturalWidth > 0) {
+            ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+        } else {
+            ctx.fillStyle = "#87ceeb";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+    } catch (e) {
         ctx.fillStyle = "#87ceeb";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Penguen Çizimi
-    if (penguinImg.complete && penguinImg.naturalWidth > 0) {
-        ctx.drawImage(penguinImg, penguin.frameX * 64, penguin.frameY * 40, 64, 40, penguin.x, penguin.y, 64, 64);
-    } else {
+    // Penguen Çizimi (Hata Kontrollü)
+    try {
+        if (penguinImg.complete && penguinImg.naturalWidth > 0) {
+            ctx.drawImage(penguinImg, penguin.frameX * 64, penguin.frameY * 40, 64, 40, penguin.x, penguin.y, 64, 64);
+        } else {
+            ctx.fillStyle = "black";
+            ctx.fillRect(penguin.x, penguin.y, 40, 40);
+        }
+    } catch (e) {
         ctx.fillStyle = "black";
         ctx.fillRect(penguin.x, penguin.y, 40, 40);
     }
@@ -148,7 +142,7 @@ function draw() {
     ctx.fillText("PUAN: " + puan, 20, 45);
     ctx.shadowBlur = 0;
 
-    // Oyun Bitti
+    // Oyun Bitti Ekranı
     if (!gameActive) {
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -168,3 +162,6 @@ function gameLoop() {
     draw();
     requestAnimationFrame(gameLoop);
 }
+
+// Oyunu hemen başlat, resimleri bekleme
+gameLoop();
