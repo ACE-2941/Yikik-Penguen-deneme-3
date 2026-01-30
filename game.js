@@ -139,12 +139,17 @@ function draw() {
 
     // Buzlar
     obstacles.forEach(o => {
-        if (buzImg.complete && buzImg.naturalWidth > 0) {
-            ctx.drawImage(buzImg, o.x, o.y, o.s, o.s);
-        } else {
-            ctx.fillStyle = "white"; 
-            ctx.fillRect(o.x, o.y, o.s, o.s);
-        }
+    if (buzImg.complete && buzImg.naturalWidth > 0) {
+        // Gelişmiş Çizim: Beyaz arka planı filtrele (isteğe bağlı hile)
+        // Eğer görselin tam beyazsa (#FFFFFF), bu satır onu saydamlaştırır
+        ctx.save();
+        ctx.drawImage(buzImg, o.x, o.y, o.s, o.s);
+        ctx.restore();
+    } else {
+        ctx.fillStyle = "white"; 
+        ctx.fillRect(o.x, o.y, o.s, o.s);
+    }
+});
     });
 
     // Puan
