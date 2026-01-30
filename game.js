@@ -18,7 +18,7 @@ bgImg.src = "assets/arka-plan.jpg";
 const penguin = {
     x: 130, 
     y: 500,
-    w: 100, 
+    w: 100,
     h: 100,
     frameX: 0,
     frameY: 0,
@@ -41,7 +41,10 @@ window.onkeydown = (e) => {
     if (e.key === " " || e.key === "ArrowUp") jump();
     if (!gameActive && gameOverTimer > 30) resetGame();
 };
-window.onkeyup = () => moveDir = 0;
+
+window.onkeyup = () => {
+    moveDir = 0;
+};
 
 function jump() {
     if (!penguin.isJumping && gameActive) {
@@ -63,25 +66,22 @@ function resetGame() {
     timer = 0;
 }
 
-// BUZ ÇİZME FONKSİYONU (Resim Yerine Geçer)
+// BUZ ÇİZME FONKSİYONU - Resim gerektirmez, %100 saydamdır
 function drawIce(x, y, w, h) {
     ctx.save();
     ctx.beginPath();
-    // Sivri uç aşağı bakacak şekilde üçgen çizimi
-    ctx.moveTo(x, y);                 // Sol üst
-    ctx.lineTo(x + w, y);             // Sağ üst
-    ctx.lineTo(x + w / 2, y + h);     // Alt orta (Sivri uç)
+    ctx.moveTo(x, y); 
+    ctx.lineTo(x + w, y);
+    ctx.lineTo(x + w / 2, y + h); 
     ctx.closePath();
 
-    // Buz Efekti (Gradyan Mavi)
     let grad = ctx.createLinearGradient(x, y, x, y + h);
-    grad.addColorStop(0, "#e0f7fa"); // Açık buz rengi
-    grad.addColorStop(1, "#4fc3f7"); // Koyu buz rengi
+    grad.addColorStop(0, "#e0f7fa");
+    grad.addColorStop(1, "#4fc3f7");
     
     ctx.fillStyle = grad;
     ctx.fill();
     
-    // Parlama çizgisi (Beyaz ince kenar)
     ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
     ctx.lineWidth = 2;
     ctx.stroke();
@@ -113,8 +113,7 @@ function update() {
     let uretimSikligi = (puan < 100) ? 80 : 55;
 
     if (++timer > uretimSikligi) {
-        // Buz boyutlarını ayarladık
-        obstacles.push({ x: Math.random() * (canvas.width - 40), y: -60, w: 40, h: 70 });
+        obstacles.push({ x: Math.random() * (canvas.width - 40), y: -70, w: 40, h: 70 });
         timer = 0;
     }
 
@@ -124,7 +123,6 @@ function update() {
             obstacles.splice(i, 1);
             puan++;
         }
-        // Çarpışma Kontrolü
         if (penguin.x + 30 < o.x + o.w && penguin.x + 70 > o.x && 
             penguin.y + 20 < o.y + o.h && penguin.y + 80 > o.y) {
             gameActive = false;
@@ -149,12 +147,8 @@ function draw() {
 
     if (penguinImg.complete && penguinImg.naturalWidth > 0) {
         ctx.drawImage(penguinImg, penguin.frameX * 64, penguin.frameY * 40, 64, 40, penguin.x, penguin.y, penguin.w, penguin.h);
-    } else {
-        ctx.fillStyle = "black";
-        ctx.fillRect(penguin.x, penguin.y, penguin.w, penguin.h);
     }
 
-    // BUZLAR BURADA ÇİZİLİYOR
     obstacles.forEach(o => {
         drawIce(o.x, o.y, o.w, o.h);
     });
@@ -187,5 +181,8 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-canvas.addEventListener("mousedown", () => { if(!gameActive) resetGame(); });
+canvas.addEventListener("mousedown", () => {
+    if (!gameActive) resetGame();
+});
+
 gameLoop();
