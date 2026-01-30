@@ -1,3 +1,11 @@
+Mavi ekran almanın sebebi, kodun içine drawIce fonksiyonunu eklemiş olmamız ama senin gönderdiğin kodda bu fonksiyonun tanımlı olmaması. Tarayıcı drawIce is not defined hatası verdiği için oyun döngüsü (gameLoop) tamamen duruyor.
+
+Ayrıca buz.png dosyasını tekrar yüklediğine göre, kodun içine hem resmi çizecek hem de resim yüklenmezse oyunun çökmesini engelleyecek en sağlam hali aşağıya bırakıyorum.
+
+İşte Hataları Giderilmiş Final Kod:
+Bu kodu kopyalayıp game.js dosyasının tamamıyla değiştir:
+
+JavaScript
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -13,15 +21,16 @@ const penguinImg = new Image();
 penguinImg.src = "assets/penguin.png";
 
 const bgImg = new Image();
-bgImg.src = "assets/arka-plan.jpg"; // JPG uzantın
+bgImg.src = "assets/arka-plan.jpg"; 
 
 const buzImg = new Image();
-buzImg.src = "assets/buz.png"; // Yeni buz parçası asseti
+buzImg.src = "assets/buz.png"; // PNG dosyanı burada çağırıyoruz
 
 const penguin = {
-    x: 148,
-    y: 540,
-    w: 64, h: 64,
+    x: 130, 
+    y: 500,
+    w: 100, // Penguen büyük kalsın demiştin
+    h: 100,
     frameX: 0,
     frameY: 0,
     maxFrames: 5,
@@ -41,8 +50,7 @@ window.onkeydown = (e) => {
     if (e.key === "ArrowLeft") moveDir = -1;
     if (e.key === "ArrowRight") moveDir = 1;
     if (e.key === " " || e.key === "ArrowUp") jump();
-    // Oyun bittiyse ve biraz zaman geçtiyse herhangi bir tuşla restart
-    if (!gameActive && gameOverTimer > 60) resetGame();
+    if (!gameActive && gameOverTimer > 30) resetGame();
 };
 window.onkeyup = () => moveDir = 0;
 
@@ -55,14 +63,13 @@ function jump() {
     }
 }
 
-// OYUNU SIFIRLAMA FONKSİYONU (Donmayı engeller)
 function resetGame() {
     puan = 0;
     obstacles = [];
     gameActive = true;
     gameOverTimer = 0;
-    penguin.x = 148;
-    penguin.y = 540;
+    penguin.x = 130;
+    penguin.y = 500;
     penguin.velocityY = 0;
     timer = 0;
 }
@@ -70,16 +77,15 @@ function resetGame() {
 function update() {
     if (!gameActive) {
         gameOverTimer++;
-        if (gameOverTimer > 180) resetGame(); // 3 saniye sonra otomatik başla
         return;
     }
 
-    penguin.x += moveDir * 8;
+    penguin.x += moveDir * 9;
     penguin.y += penguin.velocityY;
     penguin.velocityY += penguin.gravity;
 
-    if (penguin.y > 540) {
-        penguin.y = 540;
+    if (penguin.y > 500) {
+        penguin.y = 500;
         penguin.isJumping = false;
         penguin.velocityY = 0;
         penguin.frameY = 0;
@@ -89,14 +95,11 @@ function update() {
     if (penguin.x < 0) penguin.x = 0;
     if (penguin.x > canvas.width - penguin.w) penguin.x = canvas.width - penguin.w;
 
-    // HIZ DENGESİ: 100 puana kadar yavaş (3 hızında), sonra hızlanır.
     let oyunHizi = (puan < 100) ? 3 : 3 + (puan - 100) * 0.05;
-    
-    // Engel Üretim Sıklığı (Başlarda daha az engel)
-    let uretimSikligi = (puan < 100) ? 70 : 55;
+    let uretimSikligi = (puan < 100) ? 80 : 55;
 
     if (++timer > uretimSikligi) {
-        obstacles.push({ x: Math.random() * (canvas.width - 40), y: -40, s: 40 });
+        obstacles.push({ x: Math.random() * (canvas.width - 50), y: -70, s: 60 });
         timer = 0;
     }
 
@@ -106,9 +109,9 @@ function update() {
             obstacles.splice(i, 1);
             puan++;
         }
-        // Çarpışma Testi
-        if (penguin.x + 15 < o.x + o.s && penguin.x + 45 > o.x && 
-            penguin.y + 10 < o.y + o.s && penguin.y + 55 > o.y) {
+        // Hitbox ayarı
+        if (penguin.x + 25 < o.x + o.s && penguin.x + 75 > o.x && 
+            penguin.y + 20 < o.y + o.s && penguin.y + 85 > o.y) {
             gameActive = false;
         }
     });
@@ -132,18 +135,20 @@ function draw() {
 
     // 2. Penguen
     if (penguinImg.complete && penguinImg.naturalWidth > 0) {
-        ctx.drawImage(penguinImg, penguin.frameX * 64, penguin.frameY * 40, 64, 40, penguin.x, penguin.y, 64, 64);
+        ctx.drawImage(penguinImg, penguin.frameX * 64, penguin.frameY * 40, 64, 40, penguin.x, penguin.y, penguin.w, penguin.h);
     } else {
         ctx.fillStyle = "black";
-        ctx.fillRect(penguin.x, penguin.y, 40, 40);
+        ctx.fillRect(penguin.x, penguin.y, penguin.w, penguin.h);
     }
 
-    // 3. Buz Engelleri
+    // 3. Buz Engelleri (Kritik Alan)
     obstacles.forEach(o => {
+        // Eğer resim yüklendiyse ve bozuk değilse resmi çiz
         if (buzImg.complete && buzImg.naturalWidth > 0) {
             ctx.drawImage(buzImg, o.x, o.y, o.s, o.s);
         } else {
-            ctx.fillStyle = "white"; // Buz resmi yoksa beyaz kutu
+            // Resim yoksa oyunun donmaması için geçici bir kutu çiz
+            ctx.fillStyle = "white"; 
             ctx.fillRect(o.x, o.y, o.s, o.s);
         }
     });
@@ -156,18 +161,18 @@ function draw() {
     ctx.fillText("PUAN: " + puan, 20, 45);
     ctx.shadowBlur = 0;
 
-    // 5. Penguen Finito Ekranı
+    // 5. Bitiş Ekranı
     if (!gameActive) {
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "yellow";
-        ctx.font = "bold 40px Arial";
+        ctx.font = "bold 36px Arial";
         ctx.textAlign = "center";
         ctx.fillText("Penguen Finito", canvas.width / 2, canvas.height / 2);
         ctx.fillStyle = "white";
         ctx.font = "20px Arial";
-        ctx.fillText("Toplam Puan: " + puan, canvas.width / 2, canvas.height / 2 + 50);
-        ctx.fillText("Yeniden Başlıyor...", canvas.width / 2, canvas.height / 2 + 90);
+        ctx.fillText("Puan: " + puan, canvas.width / 2, canvas.height / 2 + 50);
+        ctx.fillText("TEKRAR İÇİN TIKLA", canvas.width / 2, canvas.height / 2 + 90);
         ctx.textAlign = "left";
     }
 }
@@ -177,5 +182,10 @@ function gameLoop() {
     draw();
     requestAnimationFrame(gameLoop);
 }
+
+// Mouse tıklamasıyla yeniden başlatma
+canvas.addEventListener("mousedown", () => {
+    if (!gameActive) resetGame();
+});
 
 gameLoop();
