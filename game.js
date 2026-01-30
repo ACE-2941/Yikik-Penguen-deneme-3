@@ -16,7 +16,7 @@ const bgImg = new Image();
 bgImg.src = "assets/arka-plan.jpg"; 
 
 const buzImg = new Image();
-buzImg.src = "assets/buz.jpg"; // JPG olduğundan eminiz
+buzImg.src = "assets/buz.png"; // JPG olduğundan eminiz
 
 const penguin = {
     x: 130, 
@@ -166,7 +166,7 @@ function draw() {
         ctx.fillStyle = "white";
         ctx.font = "20px Arial";
         ctx.fillText("Puan: " + puan, canvas.width / 2, canvas.height / 2 + 50);
-        ctx.fillText("Başlatmak için TIKLA veya TUŞA BAS", canvas.width / 2, canvas.height / 2 + 90);
+        ctx.fillText("EKRANA BASIVER", canvas.width / 2, canvas.height / 2 + 90);
         ctx.textAlign = "left";
     }
 }
