@@ -6,14 +6,17 @@ canvas.height = 640;
 
 let puan = 0;
 let gameActive = true;
-let gameOverTimer = 0; // Oyun bittikten sonra bekleme süresi
+let gameOverTimer = 0;
 
-// ASSETLER
+// ASSETLER - Uzantıları JPEG olarak güncelledik
 const penguinImg = new Image();
-penguinImg.src = "assets/penguin.png";
+penguinImg.src = "assets/penguin.png"; // Penguen hala png ise böyle kalsın
 
 const bgImg = new Image();
-bgImg.src = "assets/arka-plan.png";
+bgImg.src = "assets/arka-plan.jpeg"; // İŞTE KRİTİK DEĞİŞİKLİK BURADA
+
+// Resimlerde hata kontrolü
+bgImg.onerror = () => console.log("Arka plan (jpeg) bulunamadı! Yol: " + bgImg.src);
 
 const penguin = {
     x: 148,
@@ -38,8 +41,8 @@ window.onkeydown = (e) => {
     if (e.key === "ArrowLeft") moveDir = -1;
     if (e.key === "ArrowRight") moveDir = 1;
     if (e.key === " " || e.key === "ArrowUp") jump();
-    // Oyun bittiyse herhangi bir tuşla hemen başlatmak istersen:
-    if (!gameActive && gameOverTimer > 60) location.reload();
+    // Oyun bittikten kısa bir süre sonra herhangi bir tuşla restart
+    if (!gameActive && gameOverTimer > 30) location.reload();
 };
 window.onkeyup = () => moveDir = 0;
 
@@ -55,7 +58,8 @@ function jump() {
 function update() {
     if (!gameActive) {
         gameOverTimer++;
-        if (gameOverTimer > 180) location.reload(); // 3 saniye sonra otomatik başla
+        // 3 saniye sonra otomatik restart
+        if (gameOverTimer > 180) location.reload();
         return;
     }
 
@@ -88,9 +92,10 @@ function update() {
             obstacles.splice(i, 1);
             puan++;
         }
+        // Çarpışma kutusu (Hitbox)
         if (penguin.x + 15 < o.x + o.s && penguin.x + 45 > o.x && 
             penguin.y + 10 < o.y + o.s && penguin.y + 55 > o.y) {
-            gameActive = false; // Bildirim (alert) yerine oyun bitti durumuna sokuyoruz
+            gameActive = false;
         }
     });
 
@@ -103,8 +108,8 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. Arka Plan
-    if (bgImg.complete) {
+    // 1. Arka Plan (JPEG olarak çizilir)
+    if (bgImg.complete && bgImg.naturalWidth !== 0) {
         ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
     } else {
         ctx.fillStyle = "#87ceeb";
@@ -112,7 +117,7 @@ function draw() {
     }
 
     // 2. Penguen
-    if (penguinImg.complete) {
+    if (penguinImg.complete && penguinImg.naturalWidth !== 0) {
         ctx.drawImage(penguinImg, penguin.frameX * 64, penguin.frameY * 40, 64, 40, penguin.x, penguin.y, 64, 64);
     }
 
@@ -122,7 +127,7 @@ function draw() {
         ctx.fillRect(o.x, o.y, o.s, o.s);
     });
 
-    // 4. PUAN (Sol Üst)
+    // 4. Puan (Sol Üst)
     ctx.fillStyle = "white";
     ctx.font = "bold 26px Arial";
     ctx.shadowColor = "black";
@@ -130,11 +135,11 @@ function draw() {
     ctx.fillText("PUAN: " + puan, 20, 45);
     ctx.shadowBlur = 0;
 
-    // 5. OYUN BİTTİ YAZISI (PENGUEN FİNİTO)
+    // 5. Oyun Bitti (Penguen Finito)
     if (!gameActive) {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height); // Arkayı hafif karart
-
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
         ctx.fillStyle = "yellow";
         ctx.font = "bold 40px Arial";
         ctx.textAlign = "center";
@@ -142,9 +147,9 @@ function draw() {
         
         ctx.fillStyle = "white";
         ctx.font = "20px Arial";
-        ctx.fillText("Puanın: " + puan, canvas.width / 2, canvas.height / 2 + 50);
+        ctx.fillText("Toplam Puan: " + puan, canvas.width / 2, canvas.height / 2 + 50);
         ctx.fillText("Yeniden Başlatılıyor...", canvas.width / 2, canvas.height / 2 + 90);
-        ctx.textAlign = "start"; // Hizalamayı düzelt
+        ctx.textAlign = "left";
     }
 }
 
