@@ -16,12 +16,12 @@ const bgImg = new Image();
 bgImg.src = "assets/arka-plan.jpg"; 
 
 const buzImg = new Image();
-buzImg.src = "assets/buz.png"; // JPG olduğundan eminiz
+buzImg.src = "assets/buz.png"; 
 
 const penguin = {
     x: 130, 
     y: 500, // Daha büyük olduğu için biraz daha yukarıda durmalı
-    w: 100, // Pengueni 100px yaptık (İyice büyüdü)
+    w: 200, // Pengueni 100px yaptık (İyice büyüdü)
     h: 100,
     frameX: 0,
     frameY: 0,
