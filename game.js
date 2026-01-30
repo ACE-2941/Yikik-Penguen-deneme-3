@@ -1,11 +1,4 @@
-Mavi ekran almanın sebebi, kodun içine drawIce fonksiyonunu eklemiş olmamız ama senin gönderdiğin kodda bu fonksiyonun tanımlı olmaması. Tarayıcı drawIce is not defined hatası verdiği için oyun döngüsü (gameLoop) tamamen duruyor.
 
-Ayrıca buz.png dosyasını tekrar yüklediğine göre, kodun içine hem resmi çizecek hem de resim yüklenmezse oyunun çökmesini engelleyecek en sağlam hali aşağıya bırakıyorum.
-
-İşte Hataları Giderilmiş Final Kod:
-Bu kodu kopyalayıp game.js dosyasının tamamıyla değiştir:
-
-JavaScript
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
